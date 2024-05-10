@@ -1,5 +1,6 @@
-﻿using System.Data;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
+using System.Data;
+
 
 namespace Zadanie4_APBD;
 
@@ -143,12 +144,12 @@ public class DataService : IDataService
 
             var z = 0;
             using (var dr = await con.ExecuteReaderAsync())
-                {
+            {
                     while (await dr.ReadAsync())
                     {
                         z = int.Parse(dr["IdProductWarehouse"].ToString());
                     }
-                }
+            }
             await connection.CloseAsync();
             return z;
         }
