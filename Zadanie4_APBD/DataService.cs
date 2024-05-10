@@ -1,7 +1,5 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
 
 namespace Zadanie4_APBD;
 
@@ -11,73 +9,71 @@ public class DataService : IDataService
             "Data Source=db-mssql16.pjwstk.edu.pl;Initial Catalog=s25713;Integrated Security=True";
 
 
+     public async Task<int> InsertProduct(Order order)
+     {
+         var x = 0;
 
-        public async Task<int> InsertProduct(Order order)
-        {
-            var x = 0;
-            
-            using var connection = new SqlConnection(_connect);
-            using var con =
-                new SqlCommand("select count (*) idProductCount from Product where IdProduct = @IdProduct", connection);
+         using var connection = new SqlConnection(_connect);
+         using var con =
+             new SqlCommand("select count (*) idProductCount from Product where IdProduct = @IdProduct", connection);
 
-            con.Parameters.AddWithValue("idProduct", order.IdProduct);
-            await connection.OpenAsync();
-            await con.ExecuteNonQueryAsync();
-            
-                using (var dr = await con.ExecuteReaderAsync())
-                {
-                    while (await dr.ReadAsync())
-                    {
+         con.Parameters.AddWithValue("idProduct", order.IdProduct);
+         await connection.OpenAsync();
+         await con.ExecuteNonQueryAsync();
 
-                        x = int.Parse(dr["idProductCount"].ToString());
+         using (var dr = await con.ExecuteReaderAsync())
+         {
+             while (await dr.ReadAsync())
+             {
 
-                    }
-                }
+                 x = int.Parse(dr["idProductCount"].ToString());
 
-            //using (var connection = new SqlConnection(_connectionString))
-            //{
-            //    await connection.OpenAsync();
-            //    using (SqlTransaction transaction = connection.BeginTransaction())
-            //    {
-            //        try
-            //        {
-            //            using (var com = new SqlCommand())
-            //            {
-            //                com.Connection = connection;
-            //                com.Transaction = transaction;
-            //                com.CommandText = "AddProductToWarehouse";
-            //                com.CommandType = System.Data.CommandType.StoredProcedure;
+             }
+         }
 
-            //                com.Parameters.AddWithValue("@IdProduct", order.IdProduct);
-            //                com.Parameters.AddWithValue("@IdWarehouse", order.IdWarehouse);
-            //                com.Parameters.AddWithValue("@Amount", order.Amount);
-            //                com.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
+         using (var connection1 = new SqlConnection(_connect))
+         {
+             await connection1.OpenAsync();
+             using (SqlTransaction transaction = connection1.BeginTransaction())
+             {
+                 try
+                 {
+                     using (var com = new SqlCommand())
+                     {
+                         com.Connection = connection1;
+                         com.Transaction = transaction;
+                         com.CommandText = "AddProductToWarehouse";
+                         com.CommandType = CommandType.StoredProcedure;
 
-            //                await com.ExecuteNonQueryAsync();
-            //                await transaction.CommitAsync();
-            //                await connection.CloseAsync();
-            //            }
-            //        }
-            //        catch (SqlException)
-            //        {
-            //            await transaction.RollbackAsync();
-            //        }
+                         com.Parameters.AddWithValue("@IdProduct", order.IdProduct);
+                         com.Parameters.AddWithValue("@IdWarehouse", order.IdWarehouse);
+                         com.Parameters.AddWithValue("@Amount", order.Amount);
+                         com.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
 
-            //    }
-            //}
+                         await com.ExecuteNonQueryAsync();
+                         await transaction.CommitAsync();
+                         await connection1.CloseAsync();
+                     }
+                 }catch (SqlException)
+                 {
+                        await transaction.RollbackAsync();
+                 }
+
+             }
+         }
 
 
-            con.Parameters.Clear();
-                con.CommandText = 
+         con.Parameters.Clear(); 
+         con.CommandText = 
                     "select count (*) IdWarehouseCount from Warehouse where IdWarehouse = @idWarehouse";
-                con.Parameters.AddWithValue("@Idwarehouse", order.IdWarehouse);               
-                await con.ExecuteNonQueryAsync();
+         con.Parameters.AddWithValue("@Idwarehouse", order.IdWarehouse);               
+         await con.ExecuteNonQueryAsync();
                
             var y = 0;
                 using (var dr = await con.ExecuteReaderAsync())
                 {
 
-                    while (await dr.ReadAsync())
+                    while (dr.Read())
                     {
 
                         y = int.Parse(dr["IdWarehouseCount"].ToString());
@@ -170,8 +166,5 @@ public class DataService : IDataService
             await command.ExecuteNonQueryAsync();
 
             connection.Close();
-
-
-
         }
 }

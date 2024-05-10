@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Zadanie4_APBD;
 
 [ApiController]
 [Route("api/warehouses")]
-public class WarehouseController
+public class WarehouseController : ControllerBase
 {
     private IDataService _dataService;
 
-    public WarehouseController(IDataService dataService)
+    public WarehouseController(IDataService dataService) 
     {
         _dataService = dataService;
     }
