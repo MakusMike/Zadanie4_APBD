@@ -94,7 +94,7 @@ public class DataService : IDataService
                 con.CommandText = 
                     "select count (*) booled from [Order] o where o.IdProduct = @idProduct and o.Amount = @amount and o.date < @date and not exists (select p.IdOrder from Product_Warehouse p  where p.IdOrder = o.IdOrder) ";
                 con.Parameters.AddWithValue("@idWarehouse", order.IdWarehouse);
-                con.Parameters.AddWithValue("@amout", order.Amount);
+                con.Parameters.AddWithValue("@amount", order.Amount);
                 con.Parameters.AddWithValue("@date", order.CreatedAt);
                 await con.ExecuteNonQueryAsync();
 
